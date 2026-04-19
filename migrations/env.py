@@ -4,11 +4,8 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
-from tg_ticket_provider.config.settings import get_settings
-from tg_ticket_provider.infrastructure.persistence.models import (  # noqa: F401
-    TicketAttachmentRow,
-    TicketRow,
-)
+from core.app.config import get_settings
+from core.db.models import *  # noqa: F403
 
 config = context.config
 if config.config_file_name is not None:

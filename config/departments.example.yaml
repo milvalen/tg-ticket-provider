@@ -1,6 +1,0 @@
-# Copy to departments.yaml (or set DEPARTMENTS_JSON) and set real forum topic ids.
-departments:
-  - name: "Department A"
-    thread_id: 1
-  - name: "Department B"
-    thread_id: 2

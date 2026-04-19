@@ -1,0 +1,19 @@
+# https://fly.io/docs/reference/configuration/
+# After clone: rename `app` (or run `fly apps create`) and set secrets from .env.example.
+
+app = "tg-ticket-provider"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[deploy]
+  release_command = "alembic upgrade head"
+
+[env]
+  PYTHONUNBUFFERED = "1"
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
