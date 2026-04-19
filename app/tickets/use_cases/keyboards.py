@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from uuid import UUID
 
-from app.use_cases.callback_payload import ticket_token
+from app.tickets.use_cases.callback_payload import ticket_token
 
 
 def empty_kb() -> str | None:
@@ -48,8 +48,8 @@ def dm_work_kb(ticket_id: UUID) -> str:
     )
 
 
-def pick_ticket_photo_kb(tickets: list[tuple[UUID, str]]) -> str:
-    """Build picker rows: each item is (ticket_id, short label for the button)."""
+def pick_ticket_media_kb(tickets: list[tuple[UUID, str]]) -> str:
+    """Build picker rows when several in-progress tickets: (ticket_id, label)."""
     rows = []
     for tid, label in tickets:
         text = (label[:28] + "…") if len(label) > 30 else label

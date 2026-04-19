@@ -1,15 +1,70 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Protocol
 from uuid import UUID
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.domain.entities import Priority, Ticket, TicketStatus, ticket_from_row
-from app.tickets.models.tickets import TicketAttachments, Tickets
+from app.tickets.models.db import TicketAttachments, Tickets
+from app.tickets.models.domain import Priority, Ticket, TicketStatus, ticket_from_row
 
 _UNSET: Any = object()
+
+
+class ITicketRepository(Protocol):
+    async def try_assign_if_open(
+        self,
+        session: AsyncSession,
+        ticket_id: UUID,
+        user_id: int,
+        *,
+        group_chat_id: int,
+    ) -> Ticket | None: ...
+
+    async def create_draft(
+        self,
+        session: AsyncSession,
+        *,
+        priority: Priority,
+        title: str,
+        body: str,
+        department_thread_id: int,
+        group_chat_id: int,
+        admin_user_id: int,
+        media_file_ids: list[str],
+    ) -> Ticket: ...
+
+    async def get_by_id(
+        self, session: AsyncSession, ticket_id: UUID
+    ) -> Ticket | None: ...
+
+    async def save_message_ids(
+        self,
+        session: AsyncSession,
+        ticket_id: UUID,
+        *,
+        group_message_id: int | None = None,
+        dm_message_id: int | None = None,
+    ) -> None: ...
+
+    async def set_status(
+        self,
+        session: AsyncSession,
+        ticket_id: UUID,
+        status: TicketStatus,
+        *,
+        assignee_user_id: int | None = None,
+        clear_dm_message: bool = False,
+    ) -> None: ...
+
+    async def list_in_progress_for_user(
+        self, session: AsyncSession, user_id: int
+    ) -> list[Ticket]: ...
+
+    async def add_attachment(
+        self, session: AsyncSession, ticket_id: UUID, file_id: str, user_id: int
+    ) -> None: ...
 
 
 class TicketRepository:

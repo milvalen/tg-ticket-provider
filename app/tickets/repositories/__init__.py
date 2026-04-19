@@ -1,3 +1,4 @@
-from app.tickets.repositories.db import TicketRepository
+from app.tickets.repositories.db import ITicketRepository, TicketRepository
+from app.tickets.repositories.telegram import TicketTelegramRepository
 
-__all__ = ["TicketRepository"]
+__all__ = ["ITicketRepository", "TicketRepository", "TicketTelegramRepository"]

@@ -7,11 +7,17 @@ primary_region = "fra"
 [build]
   dockerfile = "Dockerfile"
 
-[deploy]
-  release_command = "alembic upgrade head"
-
 [env]
   PYTHONUNBUFFERED = "1"
+
+# Bot uses Telegram long polling (nothing listens on internal_port). Fly needs an
+# [http_service] to apply min_machines_running / autostop. Scale to one Machine once:
+#   fly scale count 1
+[http_service]
+  internal_port = 8080
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
 
 [[vm]]
   memory = "256mb"

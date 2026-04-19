@@ -1,0 +1,17 @@
+---
+description: Comments, docstrings, and logs must be English and single-line
+alwaysApply: true
+---
+
+# English, single-line comments and logs
+
+- **Language**: Write all code comments, `///` / `/** */` docstrings, and log/analytics/debug messages in **English** (not other languages).
+- **Single line**: Each comment or doc line must be **one physical line**—no wrapped paragraph blocks inside `/* … */` or multi-sentence `///` spans split across many lines for one thought. If you need extra detail, use **several consecutive single-line** `//` or `///` lines instead of a long block.
+- **Logs**: Logger calls, `print`/`debugPrint` text, snackbars, and similar user- or developer-visible strings follow the same rules: English, one line per message string (avoid embedded newlines in the message).
+
+```dart
+// Good: English, one line.
+/// Loads the user profile from cache or network.
+
+// Avoid: multi-line prose in one block comment.
+```

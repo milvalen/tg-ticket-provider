@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.domain.entities import Priority, Ticket, TicketStatus
+from app.tickets.models.domain import Priority, Ticket, TicketStatus
 
 
 @dataclass(frozen=True)

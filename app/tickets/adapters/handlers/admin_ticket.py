@@ -4,15 +4,15 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from app.adapters.telegram.filters import AdminFilter
-from app.adapters.telegram.states import AdminTicketFSM
-from app.domain.entities import Priority
-from app.use_cases.ticket_workflow import TicketWorkflow
+from app.tickets.adapters.telegram.filters import AdminFilter
+from app.tickets.adapters.telegram.states import AdminTicketFSM
+from app.tickets.models.domain import Priority
+from app.tickets.repositories.telegram import TicketTelegramRepository
 from core.app.config import Settings
 from core.db.db import AsyncSessionFactory
 
 
-def register(dp: Dispatcher, settings: Settings, workflow: TicketWorkflow) -> None:
+def register(dp: Dispatcher, settings: Settings, ticket_telegram: TicketTelegramRepository) -> None:
     admins = settings.parsed_admin_ids()
     af = AdminFilter(admins)
 
@@ -28,7 +28,7 @@ def register(dp: Dispatcher, settings: Settings, workflow: TicketWorkflow) -> No
 
     @dp.callback_query(AdminTicketFSM.priority, F.data.startswith("adm:pri:"), af)
     async def cb_priority(query: CallbackQuery, state: FSMContext) -> None:
-        assert query.data
+        assert query.data and query.message
         urgent = query.data.endswith(":u")
         await state.update_data(priority=Priority.URGENT.value if urgent else Priority.NORMAL.value)
         await query.message.edit_text("Enter a short ticket title (one line):")
@@ -100,7 +100,7 @@ def register(dp: Dispatcher, settings: Settings, workflow: TicketWorkflow) -> No
 
         async with AsyncSessionFactory() as session:
             try:
-                await workflow.publish_new_ticket(
+                await ticket_telegram.publish_new_ticket(
                     session,
                     priority=priority,
                     title=title,

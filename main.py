@@ -8,10 +8,10 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
+from app.tickets.adapters.handlers import register_handlers
+from app.tickets.adapters.telegram.message_gateway import AiogramTicketMessageSync
 from app.tickets.repositories.db import TicketRepository
-from app.adapters.telegram.handlers import register_handlers
-from app.adapters.telegram.message_gateway import AiogramMessageSync
-from app.use_cases.ticket_workflow import TicketWorkflow
+from app.tickets.repositories.telegram import TicketTelegramRepository
 from core.app.config import get_settings
 from core.kpi.factory import build_kpi_sink
 
@@ -26,16 +26,16 @@ async def main() -> None:
     dp = Dispatcher(storage=MemoryStorage())
 
     repo = TicketRepository()
-    messages = AiogramMessageSync(bot)
+    messages = AiogramTicketMessageSync(bot)
     kpi = build_kpi_sink(settings)
-    workflow = TicketWorkflow(
+    ticket_telegram = TicketTelegramRepository(
         repo,
         messages,
         kpi,
         staff_group_chat_id=settings.STAFF_GROUP_CHAT_ID,
     )
 
-    register_handlers(dp, settings, workflow)
+    register_handlers(dp, settings, ticket_telegram)
 
     await dp.start_polling(bot)
 

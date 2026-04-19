@@ -4,15 +4,8 @@ from uuid import UUID
 
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.use_cases.keyboards import (
-    dm_take_or_return_kb,
-    dm_work_kb,
-    empty_kb,
-    group_accept_kb,
-)
-from app.use_cases.ports import IMessageSync, ITicketRepository
-from core.kpi.protocol import IKpiSink, KpiEvent, KpiEventType
-from app.domain.entities import (
+from app.tickets.models.message_format import render_ticket_caption
+from app.tickets.models.domain import (
     Priority,
     Ticket,
     TicketStatus,
@@ -20,14 +13,22 @@ from app.domain.entities import (
     transition_return_to_group,
     transition_start_work,
 )
-from app.domain.message_format import render_ticket_caption
+from app.tickets.adapters.telegram.message_gateway import ITicketMessageSync
+from app.tickets.repositories.db import ITicketRepository
+from app.tickets.use_cases.keyboards import (
+    dm_take_or_return_kb,
+    dm_work_kb,
+    empty_kb,
+    group_accept_kb,
+)
+from core.kpi.protocol import IKpiSink, KpiEvent, KpiEventType
 
 
-class TicketWorkflow:
+class TicketTelegramRepository:
     def __init__(
         self,
         repo: ITicketRepository,
-        messages: IMessageSync,
+        messages: ITicketMessageSync,
         kpi: IKpiSink,
         staff_group_chat_id: int,
     ) -> None:
@@ -58,16 +59,14 @@ class TicketWorkflow:
             media_file_ids=media_file_ids,
         )
         text = render_ticket_caption(ticket, for_dm=False)
-        main_id, extras = await self._messages.publish_to_department_thread(
+        main_id, _ = await self._messages.publish_to_department_thread(
             chat_id=self._staff_group_chat_id,
             thread_id=department_thread_id,
             text_html=text,
             media_file_ids=media_file_ids,
             reply_markup_json=group_accept_kb(ticket.id),
         )
-        await self._repo.save_message_ids(
-            session, ticket.id, group_message_id=main_id
-        )
+        await self._repo.save_message_ids(session, ticket.id, group_message_id=main_id)
         ticket.group_message_id = main_id
         await self._kpi.emit(
             KpiEvent.now(
@@ -227,9 +226,7 @@ class TicketWorkflow:
         await self._repo.set_status(session, ticket_id, TicketStatus.DONE)
 
         text_g = render_ticket_caption(ticket, for_dm=False)
-        text_d = render_ticket_caption(
-            ticket, for_dm=True, assignee_hint="Completed."
-        )
+        text_d = render_ticket_caption(ticket, for_dm=True, assignee_hint="Completed.")
         if ticket.group_message_id:
             await self._messages.edit_ticket_message(
                 chat_id=self._staff_group_chat_id,
@@ -258,7 +255,7 @@ class TicketWorkflow:
         )
         return ticket
 
-    async def attach_photo(
+    async def attach_report(
         self, session: AsyncSession, ticket_id: UUID, user_id: int, file_id: str
     ) -> None:
         t = await self._repo.get_by_id(session, ticket_id)

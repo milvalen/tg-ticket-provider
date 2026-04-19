@@ -1,6 +1,6 @@
 """Register all SQLModel table classes for Alembic metadata (see main-backend core/db/models)."""
 
-from app.tickets.models.tickets import TicketAttachments, Tickets
+from app.tickets.models.db import TicketAttachments, Tickets
 
 __all__ = [
     "TicketAttachments",
