@@ -13,6 +13,7 @@ dependencies = [
     "alembic>=1.14.0",
     "pydantic-settings>=2.6.0",
     "PyYAML>=6.0.2",
+    "gspread>=6.0.0",
 ]
 
 [project.optional-dependencies]

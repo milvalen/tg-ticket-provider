@@ -10,7 +10,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 from tg_ticket_provider.application.ticket_workflow import TicketWorkflow
 from tg_ticket_provider.config.settings import get_settings
-from tg_ticket_provider.infrastructure.kpi.noop import NoOpKpiSink
+from tg_ticket_provider.infrastructure.kpi.factory import build_kpi_sink
 from tg_ticket_provider.infrastructure.persistence.repository import TicketRepository
 from tg_ticket_provider.infrastructure.telegram.handlers import register_handlers
 from tg_ticket_provider.infrastructure.telegram.message_gateway import AiogramMessageSync
@@ -27,7 +27,7 @@ async def main() -> None:
 
     repo = TicketRepository()
     messages = AiogramMessageSync(bot)
-    kpi = NoOpKpiSink()
+    kpi = build_kpi_sink(settings)
     workflow = TicketWorkflow(
         repo,
         messages,

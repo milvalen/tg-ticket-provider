@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     ECHO_SQLALCHEMY: bool = False
     LOCAL_RUN: bool = False
 
+    GOOGLE_SHEETS_SPREADSHEET_ID: str | None = None
+    GOOGLE_SERVICE_ACCOUNT_FILE: str | None = None
+
     @field_validator("ADMIN_USER_IDS", mode="before")
     @classmethod
     def strip_admin_ids(cls, v: Any) -> str:
